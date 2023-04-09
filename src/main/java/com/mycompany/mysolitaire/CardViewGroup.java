@@ -133,6 +133,14 @@ public class CardViewGroup extends Group implements MovementPlacement {
         return (lowerGroup == null);
     }
     
+    public int getSize() {
+        if (is_leaf()) {
+            return 1;
+        } else {
+            return 1 + lowerGroup.getSize();
+        }
+    }
+    
     public boolean is_base() {
         return is_base;
     }
@@ -231,4 +239,8 @@ public class CardViewGroup extends Group implements MovementPlacement {
         persistentY = persistentY + y;
     }
     
+}
+
+class Delta {
+    double x,y;
 }

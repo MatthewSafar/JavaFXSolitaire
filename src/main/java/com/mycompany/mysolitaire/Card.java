@@ -1,5 +1,4 @@
 package com.mycompany.mysolitaire;
-import javafx.scene.image.Image;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license

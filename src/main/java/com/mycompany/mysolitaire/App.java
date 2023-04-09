@@ -2,7 +2,6 @@ package com.mycompany.mysolitaire;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventType;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -120,8 +119,4 @@ public class App extends Application {
         cardsScene = new Scene(root, settings.getWidth(), settings.getHeight());
     }
 
-}
-
-class Delta {
-    double x,y;
 }

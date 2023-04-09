@@ -55,6 +55,13 @@ public class WasteView extends Group implements MovementPlacement{
         }
         return toremove.getCard();
     }
+    
+    public void removeAll() {
+        for (CardViewGroup toRemove : cardStack) {
+            getChildren().remove(toRemove);
+        }
+        cardStack.clear();
+    }
 
     @Override
     public void moveTo(double x, double y) {
