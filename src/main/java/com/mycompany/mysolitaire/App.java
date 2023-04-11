@@ -109,6 +109,14 @@ public class App extends Application {
             primaryStage.setScene(mainMenu);
         });
         leftMenu.getChildren().add(backButton);
+        var resetButton = new Button("Reset");
+        resetButton.setOnAction((ActionEvent e) -> {
+            var solitaireGame = new SolitairePane();
+            HBox.setHgrow(solitaireGame, Priority.ALWAYS);
+            root.getChildren().remove(root.getChildren().size() - 1);
+            root.getChildren().add(solitaireGame);
+        });
+        leftMenu.getChildren().add(resetButton);
         
         leftMenu.setStyle("-fx-background-color: darkgray; -fx-text-fill: white;");
         
