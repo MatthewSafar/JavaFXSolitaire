@@ -31,6 +31,7 @@ public class App extends Application {
         
         primaryStage.setTitle("mySolitaire");
         primaryStage.setScene(mainMenu);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 

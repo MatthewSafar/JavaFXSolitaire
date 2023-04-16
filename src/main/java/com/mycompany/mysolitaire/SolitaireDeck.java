@@ -160,15 +160,23 @@ public class SolitaireDeck {
     
     public Card nextDeckCard() {
         if (deck.size() == 0) {
-            // move waste back to deck
-            deck.addAll(waste);
-            waste.clear();
+            
             return null;
         } else {
             Card nextCard = deck.removeFirst();
             waste.add(nextCard);
             return nextCard;
         }
+    }
+    
+    public boolean deckIsEmpty() {
+        return (deck.size() == 0);
+    }
+    
+    // move waste back to deck
+    public void resetDeck() {
+        deck.addAll(waste);
+        waste.clear();
     }
     
     // todo

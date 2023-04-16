@@ -18,11 +18,15 @@ class SettingsObj {
     private static final String DEFAULT_EMPTY_IMAGE_PATH = "file:./src/resources/spot.png";
     private static final String DEFAULT_DECK_PATH = "./src/resources/full_deck/";
     
+    private static final boolean DEFAULT_HARDMODE = false;
+    
     // possible settings
     private double windowWidth;
     private double windowHeight;
     
     public DeckInfo deckInfo;
+    
+    private boolean hardmode;
     
     public SettingsObj() {
         windowWidth = DEFAULT_WIDTH;
@@ -32,6 +36,8 @@ class SettingsObj {
         deckInfo = new DeckInfo(DEFAULT_DECK_PATH,
                 DEFAULT_BACK_IMAGE_PATH,
                 DEFAULT_EMPTY_IMAGE_PATH);
+        
+        hardmode = DEFAULT_HARDMODE;
     }
     
     public double getWidth() {
@@ -40,6 +46,10 @@ class SettingsObj {
     
     public double getHeight() {
         return windowHeight;
+    }
+    
+    public boolean isHardmode() {
+        return hardmode;
     }
     
     

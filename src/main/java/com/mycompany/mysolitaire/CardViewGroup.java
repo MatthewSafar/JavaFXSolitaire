@@ -4,19 +4,25 @@
  */
 package com.mycompany.mysolitaire;
 
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 /**
  *
  * @author matth
  */
 public class CardViewGroup extends Group implements MovementPlacement {
+    public static final double FAST_ANIM_DUR = 100.0;
+    public static final double START_ANIM_DUR = 500.0;
+    
     private CardViewGroup lowerGroup;
     private CardView card;
     private double cardOffset = 20.0;
@@ -37,6 +43,8 @@ public class CardViewGroup extends Group implements MovementPlacement {
         getChildren().add(card);
         persistentX = 0;
         persistentY = 0;
+        
+        card.toFront();
     }
     
     public CardViewGroup(Card thisCard) {
@@ -112,11 +120,12 @@ public class CardViewGroup extends Group implements MovementPlacement {
     public boolean appendCardViewGroup(CardViewGroup cvg) {
         if (lowerGroup == null) {
             lowerGroup = cvg;
-            lowerGroup.moveTo(0, 0);
+            lowerGroup.relocate(0, 0);
             if (!is_base) {
                 lowerGroup.shiftBy(0, cardOffset);
             }
             lowerGroup.setInteraction(Interaction.DRAGGABLE);
+            lowerGroup.toFront();
             getChildren().add(lowerGroup);
             return true;
         } else {
@@ -173,12 +182,18 @@ public class CardViewGroup extends Group implements MovementPlacement {
                 setOnMouseEntered((MouseEvent mouseEvent) -> {
                     setCursor(Cursor.DEFAULT);  
                 }); 
+                setOnMouseClicked((MouseEvent mouseEvent) -> {
+                    // do nothing
+                });
                 break;
             case DRAGGABLE:
                 setInteraction(CardViewGroup.Interaction.NONE);
                 // allow the label to be dragged around.
                 final Delta dragDelta = new Delta();
                 setOnMousePressed((MouseEvent mouseEvent) -> {
+                    if (!(mouseEvent.getButton() == MouseButton.PRIMARY)) {
+                        return;
+                    }
                     // record a delta distance for the drag and drop operation.
                     dragDelta.x = getLayoutX() - mouseEvent.getSceneX();
                     dragDelta.y = getLayoutY() - mouseEvent.getSceneY();
@@ -194,6 +209,9 @@ public class CardViewGroup extends Group implements MovementPlacement {
                     mouseEvent.consume();
                 }); 
                 setOnMouseReleased((MouseEvent mouseEvent) -> {
+                    if (!(mouseEvent.getButton() == MouseButton.PRIMARY)) {
+                        return;
+                    }
                     setCursor(Cursor.HAND);
                     // this is a bit yikes
                     var p = getParent();
@@ -203,18 +221,27 @@ public class CardViewGroup extends Group implements MovementPlacement {
                     double absx = mouseEvent.getSceneX() - p.getBoundsInParent().getMinX();
                     double absy = mouseEvent.getSceneY() - p.getBoundsInParent().getMinY();
                     fireEvent(new DropEvent(absx,absy));
-                    moveBack();
                     mouseEvent.consume();
                 }); 
                 setOnMouseDragged((MouseEvent mouseEvent) -> {
+                    if (!(mouseEvent.getButton() == MouseButton.PRIMARY)) {
+                        return;
+                    }
                     setLayoutX(mouseEvent.getSceneX() + dragDelta.x);
                     setLayoutY(mouseEvent.getSceneY() + dragDelta.y);
                     mouseEvent.consume();
                 }); 
                 setOnMouseEntered((MouseEvent mouseEvent) -> {
                     setCursor(Cursor.HAND);
-                    mouseEvent.consume();
-                }); 
+                });
+                setOnMouseClicked((MouseEvent mouseEvent) -> {
+                    if ((mouseEvent.getButton() == MouseButton.SECONDARY) ||
+                            ((mouseEvent.getButton()== MouseButton.PRIMARY) && mouseEvent.isShiftDown())) {
+                        // create a "search to place" event
+                        fireEvent(new SearchMoveEvent());
+                        mouseEvent.consume();
+                    }
+                });
                 break;
             default:
                 break;
@@ -223,13 +250,49 @@ public class CardViewGroup extends Group implements MovementPlacement {
 
     @Override
     public void moveTo(double x, double y) {
-        relocate(x,y);
+        moveTo(x,y,0,false);
+    }
+    
+    public void moveTo(double x, double y, double animDur) {
+        moveTo(x,y,animDur,true);
+    }
+    
+    public void moveTo(double x, double y, double animDur, boolean animate) {
+        if (animate) {
+            TranslateTransition translate = new TranslateTransition();
+            translate.setDuration(Duration.millis(animDur));
+            translate.setNode(this);
+            translate.setFromX(this.getLayoutX()-x);
+            translate.setFromY(this.getLayoutY()-y);
+            relocate(x,y);
+            translate.setToX(0);
+            translate.setToY(0);
+            translate.play();
+        } else {
+            relocate(x,y);
+        }
+        persistentX = x;
+        persistentY = y;
+    }
+    
+    public void moveTo(double x, double y, double animDur, Runnable func) {
+            TranslateTransition translate = new TranslateTransition();
+            translate.setDuration(Duration.millis(animDur));
+            translate.setNode(this);
+            translate.setFromX(this.getLayoutX()-x);
+            translate.setFromY(this.getLayoutY()-y);
+            relocate(x,y);
+            translate.setToX(0);
+            translate.setToY(0);
+            translate.setOnFinished(e -> func.run());
+            translate.play();
+
         persistentX = x;
         persistentY = y;
     }
     
     public void moveBack() {
-        relocate(persistentX,persistentY);
+        moveTo(persistentX, persistentY, FAST_ANIM_DUR);
     }
     
     @Override
@@ -237,6 +300,10 @@ public class CardViewGroup extends Group implements MovementPlacement {
         relocate(getLayoutX() + x,getLayoutY() + y);
         persistentX = persistentX + x;
         persistentY = persistentY + y;
+    }
+    
+    public void shiftBy(double x, double y, double animDur) {
+        moveTo(getLayoutX() + x,getLayoutY() + y,animDur);
     }
     
 }

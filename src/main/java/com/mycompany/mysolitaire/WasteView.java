@@ -17,6 +17,9 @@ public class WasteView extends Group implements MovementPlacement{
     private static final double CARD_OFFSET = 20.0;
     private static final int STACK_MAX_SIZE = 3;
     
+    private double cardSourceX = 0;
+    private double cardSourceY = 0;
+    
     public WasteView() {
         cardStack = new ArrayDeque<CardViewGroup>();
         
@@ -29,7 +32,7 @@ public class WasteView extends Group implements MovementPlacement{
             CardViewGroup toremove = cardStack.removeFirst();
             getChildren().remove(toremove);
             for (CardViewGroup c : cardStack) {
-                c.shiftBy(-CARD_OFFSET,0);
+                c.shiftBy(-CARD_OFFSET,0,CardViewGroup.FAST_ANIM_DUR);
             }
         }
         
@@ -39,7 +42,9 @@ public class WasteView extends Group implements MovementPlacement{
         }
         
         var newCardView = new CardViewGroup(newCard);
-        newCardView.shiftBy(CARD_OFFSET*cardStack.size(),0.0);
+        newCardView.moveTo(cardSourceX, cardSourceY);
+        newCardView.shiftBy(CARD_OFFSET*cardStack.size()-cardSourceX,0.0-cardSourceY,
+                CardViewGroup.FAST_ANIM_DUR);
         newCardView.setInteraction(CardViewGroup.Interaction.DRAGGABLE);
         newCardView.toFront();
         cardStack.add(newCardView);
@@ -54,6 +59,20 @@ public class WasteView extends Group implements MovementPlacement{
             nextTopCard.setInteraction(CardViewGroup.Interaction.DRAGGABLE);
         }
         return toremove.getCard();
+    }
+    
+    // position needs to be given in relative terms to the waste
+    // i.e. top left corner of waste is (0,0)
+    public void setCardSource(double x, double y) {
+        cardSourceX = x;
+        cardSourceY = y;
+    }
+    
+    public void animatedRemoveAll() {
+        for (CardViewGroup toRemove : cardStack) {
+            toRemove.moveTo(cardSourceX, cardSourceY,
+                    CardViewGroup.FAST_ANIM_DUR, this::removeAll);
+        }
     }
     
     public void removeAll() {
