@@ -168,9 +168,27 @@ public class SolitaireDeck {
             return nextCard;
         }
     }
-    
     public boolean deckIsEmpty() {
         return (deck.size() == 0);
+    }
+    
+    public Card nextWasteCard() {
+        if (waste.size() < 4) {
+            return null;
+        } else {
+            ArrayDeque<Card> pile = new ArrayDeque<Card> ();
+            for (int iter = 0; iter < 3; iter++) {
+                pile.addLast(waste.removeLast());
+            }
+            Card nextCard = waste.peekLast();
+            for (int iter = 0; iter < 3; iter++) {
+                waste.addLast(pile.removeLast());
+            }
+            return nextCard;
+        }
+    }
+    public boolean wasteIsEmpty() {
+        return (waste.size() == 0);
     }
     
     // move waste back to deck

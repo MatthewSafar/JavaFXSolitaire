@@ -59,7 +59,7 @@ public class CardViewGroup extends Group implements MovementPlacement {
         Rectangle r = new Rectangle();
         r.setWidth(CardView.DEF_WIDTH);
         r.setHeight(CardView.DEF_WIDTH * CardView.H_W_RATIO);
-        //r.setFill(Color.TRANSPARENT);
+        r.setFill(Color.TRANSPARENT);
         
         getChildren().add(r);
                 
@@ -110,11 +110,35 @@ public class CardViewGroup extends Group implements MovementPlacement {
         }
     }
     
+    public double getXInPane() {
+        double x = this.getLayoutX();
+        Node p = this.getParent();
+        while (!(p instanceof SolitairePane)) {
+            x += p.getLayoutX();
+            p = p.getParent();
+        }
+        return x;
+    }
+    
+    public double getYInPane() {
+        double y = this.getLayoutY();
+        Node p = this.getParent();
+        while (!(p instanceof SolitairePane)) {
+            y += p.getLayoutY();
+            p = p.getParent();
+        }
+        return y;
+    }
+    
     public boolean bottomBoundsContains(double x, double y) {
-        CardViewGroup c = getTopGroup();
-        Bounds topBounds = c.getBoundsInParent();
+        CardViewGroup bottom = getBottomGroup();
+        double cornerX = bottom.getXInPane();
+        double cornerY = bottom.getYInPane();
         
-        return c.getBoundsInParent().contains(x,y);
+        boolean inX = (cornerX < x && x < cornerX + CardView.DEF_WIDTH);
+        boolean inY = (cornerY < y && y < cornerY + CardView.DEF_WIDTH * CardView.H_W_RATIO);
+        
+        return (inX && inY);
     }
     
     public boolean appendCardViewGroup(CardViewGroup cvg) {
@@ -213,13 +237,8 @@ public class CardViewGroup extends Group implements MovementPlacement {
                         return;
                     }
                     setCursor(Cursor.HAND);
-                    // this is a bit yikes
-                    var p = getParent();
-                    while (!(p instanceof SolitairePane)) {
-                        p = p.getParent();
-                    }
-                    double absx = mouseEvent.getSceneX() - p.getBoundsInParent().getMinX();
-                    double absy = mouseEvent.getSceneY() - p.getBoundsInParent().getMinY();
+                    double absx = getXInPane() + CardView.DEF_WIDTH / 2;
+                    double absy = getYInPane() + CardView.DEF_WIDTH * CardView.H_W_RATIO / 2;
                     fireEvent(new DropEvent(absx,absy));
                     mouseEvent.consume();
                 }); 
@@ -250,42 +269,38 @@ public class CardViewGroup extends Group implements MovementPlacement {
 
     @Override
     public void moveTo(double x, double y) {
-        moveTo(x,y,0,false);
+        relocate(x,y);
+        
+        persistentX = x;
+        persistentY = y;
     }
     
     public void moveTo(double x, double y, double animDur) {
-        moveTo(x,y,animDur,true);
-    }
-    
-    public void moveTo(double x, double y, double animDur, boolean animate) {
-        if (animate) {
-            TranslateTransition translate = new TranslateTransition();
-            translate.setDuration(Duration.millis(animDur));
-            translate.setNode(this);
-            translate.setFromX(this.getLayoutX()-x);
-            translate.setFromY(this.getLayoutY()-y);
-            relocate(x,y);
-            translate.setToX(0);
-            translate.setToY(0);
-            translate.play();
-        } else {
-            relocate(x,y);
-        }
+        TranslateTransition translate = new TranslateTransition();
+        translate.setDuration(Duration.millis(animDur));
+        translate.setNode(this);
+        translate.setFromX(this.getLayoutX()-x);
+        translate.setFromY(this.getLayoutY()-y);
+        relocate(x,y);
+        translate.setToX(0);
+        translate.setToY(0);
+        translate.play();
+
         persistentX = x;
         persistentY = y;
     }
     
     public void moveTo(double x, double y, double animDur, Runnable func) {
-            TranslateTransition translate = new TranslateTransition();
-            translate.setDuration(Duration.millis(animDur));
-            translate.setNode(this);
-            translate.setFromX(this.getLayoutX()-x);
-            translate.setFromY(this.getLayoutY()-y);
-            relocate(x,y);
-            translate.setToX(0);
-            translate.setToY(0);
-            translate.setOnFinished(e -> func.run());
-            translate.play();
+        TranslateTransition translate = new TranslateTransition();
+        translate.setDuration(Duration.millis(animDur));
+        translate.setNode(this);
+        translate.setFromX(this.getLayoutX()-x);
+        translate.setFromY(this.getLayoutY()-y);
+        relocate(x,y);
+        translate.setToX(0);
+        translate.setToY(0);
+        translate.setOnFinished(e -> func.run());
+        translate.play();
 
         persistentX = x;
         persistentY = y;
@@ -293,6 +308,17 @@ public class CardViewGroup extends Group implements MovementPlacement {
     
     public void moveBack() {
         moveTo(persistentX, persistentY, FAST_ANIM_DUR);
+    }
+    
+    public void moveFrom(double x, double y, double animDur) {
+        TranslateTransition translate = new TranslateTransition();
+        translate.setDuration(Duration.millis(animDur));
+        translate.setNode(this);
+        translate.setFromX(0-x);
+        translate.setFromY(0-y);
+        translate.setToX(0);
+        translate.setToY(0);
+        translate.play();
     }
     
     @Override

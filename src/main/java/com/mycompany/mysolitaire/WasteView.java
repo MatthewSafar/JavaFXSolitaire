@@ -14,6 +14,7 @@ import javafx.scene.Node;
  */
 public class WasteView extends Group implements MovementPlacement{
     private final ArrayDeque<CardViewGroup> cardStack;
+    private final CardView emptySpot;
     private static final double CARD_OFFSET = 20.0;
     private static final int STACK_MAX_SIZE = 3;
     
@@ -23,7 +24,7 @@ public class WasteView extends Group implements MovementPlacement{
     public WasteView() {
         cardStack = new ArrayDeque<CardViewGroup>();
         
-        var emptySpot = new CardView(App.settings.deckInfo.getEmptyImage());
+        emptySpot = new CardView(App.settings.deckInfo.emptyImage);
         getChildren().add(emptySpot);
     }
     
@@ -51,13 +52,27 @@ public class WasteView extends Group implements MovementPlacement{
         getChildren().add(newCardView);
     }
     
-    public Card remove_top_card() {
+    public Card remove_top_card(Card newCard) {
         CardViewGroup toremove = cardStack.removeLast();
         getChildren().remove(toremove);
         if (cardStack.size() > 0) {
             var nextTopCard = cardStack.getLast();
             nextTopCard.setInteraction(CardViewGroup.Interaction.DRAGGABLE);
         }
+        // add a card to the back
+        if (newCard != null) {
+            var newCardView = new CardViewGroup(newCard);
+            newCardView.moveTo(0, 0);
+            for (CardViewGroup cvg : cardStack) {
+                cvg.shiftBy(CARD_OFFSET, 0.0);
+            }
+            cardStack.addFirst(newCardView);
+            getChildren().add(newCardView);
+            newCardView.toBack();
+            emptySpot.toBack();
+            
+        }
+        
         return toremove.getCard();
     }
     

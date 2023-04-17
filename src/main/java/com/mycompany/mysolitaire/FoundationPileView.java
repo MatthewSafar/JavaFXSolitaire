@@ -1,6 +1,7 @@
 package com.mycompany.mysolitaire;
 
 import javafx.scene.Group;
+import javafx.scene.Node;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -24,7 +25,7 @@ public class FoundationPileView extends Group implements MovementPlacement {
     public FoundationPileView(DeckInfo.Suits suit) {
         this.suit = suit;
         
-        var emptySpot = new CardView(App.settings.deckInfo.getEmptyImage());
+        var emptySpot = new CardView(App.settings.deckInfo.getFoundationImage(suit));
         getChildren().add(emptySpot);
         
         underCard = new CardView();
@@ -39,7 +40,7 @@ public class FoundationPileView extends Group implements MovementPlacement {
     }
     
     // TODO add visual indicator of number of cards
-    public void put_card_on_top(Card newCard) {
+    public CardViewGroup put_card_on_top(Card newCard) {
         if (topCard != null) {
             getChildren().remove(topCard);
             getChildren().remove(underCard);
@@ -52,6 +53,7 @@ public class FoundationPileView extends Group implements MovementPlacement {
         getChildren().add(topCard);
         topCard.toFront();
         cardCount = cardCount + 1;
+        return topCard;
     }
     
     public Card remove_top_card(Card newCard) {
@@ -59,13 +61,8 @@ public class FoundationPileView extends Group implements MovementPlacement {
         getChildren().remove(topCard);
         getChildren().remove(underCard);
         if (newCard != null) {
-            System.out.println("Undercard: " + underCard.getCard().toString());
-            System.out.println("topCard: " + topCard.toString());
             topCard = new CardViewGroup(underCard);
             underCard = new CardView(newCard);
-            System.out.println("after:");
-            System.out.println("Undercard: " + underCard.getCard().toString());
-            System.out.println("topCard: " + topCard.toString());
             topCard.setInteraction(CardViewGroup.Interaction.DRAGGABLE);
         } else if (underCard.getCard() != null) {
             topCard = new CardViewGroup(underCard);
@@ -81,6 +78,26 @@ public class FoundationPileView extends Group implements MovementPlacement {
         topCard.toFront();
         cardCount = cardCount - 1;
         return out;
+    }
+    
+    public double getXInPane() {
+        double x = this.getLayoutX();
+        Node p = this.getParent();
+        while (!(p instanceof SolitairePane)) {
+            x += p.getLayoutX();
+            p = p.getParent();
+        }
+        return x;
+    }
+    
+    public double getYInPane() {
+        double y = this.getLayoutY();
+        Node p = this.getParent();
+        while (!(p instanceof SolitairePane)) {
+            y += p.getLayoutX();
+            p = p.getParent();
+        }
+        return y;
     }
 
     @Override

@@ -17,7 +17,12 @@ import javafx.scene.image.Image;
  */
 public class DeckInfo {
     private Image backImage;
-    private Image emptyImage;
+    public final Image emptyImage;
+    public final Image heartFoundationImage;
+    public final Image diamondFoundationImage;
+    public final Image clubFoundationImage;
+    public final Image spadeFoundationImage;
+    public final Image deckRefreshImage;
     private Image cardImages[] = new Image[52];
     
     // These are all static. In a better world, there is more functionality here 
@@ -25,17 +30,30 @@ public class DeckInfo {
         RED, BLACK
     }
     public static enum Suits {
-        HEART, SPADE, CLUB, DIAMOND
+        HEART, DIAMOND, CLUB, SPADE
     }
     public static enum Ranks {
         A, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING
     }
     public static final int DECK_SIZE = 52;
     
-    public DeckInfo(String deck_location, String backImageLocation, String emptyImageLocation) {
+    public DeckInfo(String deck_location, 
+            String backImageLocation, 
+            String emptyImageLocation,
+            String heartFoundationImageLocation,
+            String diamondFoundationImageLocation,
+            String clubFoundationImageLocation,
+            String spadeFoundationImageLocation,
+            String deckRefreshImageLocation) {
         setCardImages(deck_location);
         setBackImage(backImageLocation);
-        setEmptyImage(emptyImageLocation);
+        
+        emptyImage = new Image(emptyImageLocation);
+        heartFoundationImage = new Image(heartFoundationImageLocation);
+        diamondFoundationImage = new Image(diamondFoundationImageLocation);
+        clubFoundationImage = new Image(clubFoundationImageLocation);
+        spadeFoundationImage = new Image(spadeFoundationImageLocation);
+        deckRefreshImage = new Image(deckRefreshImageLocation);
     }
     
     // returns the color of a suit
@@ -55,12 +73,19 @@ public class DeckInfo {
         return backImage;
     }
     
-    public void setEmptyImage(String filePath) {
-        emptyImage = new Image(filePath);
-    }
-    
-    public Image getEmptyImage() {
-        return emptyImage;
+    public Image getFoundationImage(DeckInfo.Suits suit) {
+        switch (suit) {
+            case HEART:
+                return heartFoundationImage;
+            case DIAMOND:
+                return diamondFoundationImage;
+            case CLUB:
+                return clubFoundationImage;
+            case SPADE:
+                return spadeFoundationImage;
+            default:
+                return emptyImage;
+        }
     }
     
     public void setCardImages(String folderPath) {

@@ -25,8 +25,6 @@ public class SolitairePane extends Pane {
     public CardColumnView[] columns;
     public CardViewGroup[] playerColumns;
     
-    public Image resetImage = new Image("file:./src/resources/uno_reverse.png");
-    
     SolitairePane() {
         
         game = new SolitaireDeck();
@@ -72,15 +70,15 @@ public class SolitairePane extends Pane {
                 }
 
                 System.out.println("dcards: " + Integer.toString(game.getDeckSize()));
-                if (deck.getImage() == resetImage) {
+                if (deck.getImage() == App.settings.deckInfo.deckRefreshImage) {
                     waste.animatedRemoveAll();
                 } else {
                     waste.removeAll();
                 }
 
-                if (game.deckIsEmpty() && deck.getImage() != resetImage) {
-                    deck.setImage(resetImage);
-                } else if (deck.getImage() == resetImage) {
+                if (game.deckIsEmpty() && deck.getImage() != App.settings.deckInfo.deckRefreshImage) {
+                    deck.setImage(App.settings.deckInfo.deckRefreshImage);
+                } else if (deck.getImage() == App.settings.deckInfo.deckRefreshImage) {
                     game.resetDeck();
                     deck.setImage(App.settings.deckInfo.getBackImage());
                 }
@@ -95,9 +93,9 @@ public class SolitairePane extends Pane {
             } else {
                 Card nextCard = game.nextDeckCard();
 
-                if (game.deckIsEmpty() && deck.getImage() != resetImage) {
-                    deck.setImage(resetImage);
-                } else if (deck.getImage() == resetImage) {
+                if (game.deckIsEmpty() && deck.getImage() != App.settings.deckInfo.deckRefreshImage) {
+                    deck.setImage(App.settings.deckInfo.deckRefreshImage);
+                } else if (deck.getImage() == App.settings.deckInfo.deckRefreshImage && !game.wasteIsEmpty()) {
                     game.resetDeck();
                     deck.setImage(App.settings.deckInfo.getBackImage());
                     waste.animatedRemoveAll();
@@ -147,7 +145,7 @@ public class SolitairePane extends Pane {
                 int toWhich = foundation.getSuit().ordinal();
                 if (game.canAddFoundationCard(toWhich,toTest) && foundation.getBoundsInParent().contains(x,y)){
                     if (parent instanceof WasteView) { // coming from the waste
-                        waste.remove_top_card();
+                        waste.remove_top_card(game.nextWasteCard());
                         game.move(SolitaireDeck.Pile.WASTE,SolitaireDeck.Pile.FOUNDATION, toWhich);
                     } else if (parent instanceof FoundationPileView) {
                         ((FoundationPileView) parent).remove_top_card(null);
@@ -170,7 +168,7 @@ public class SolitairePane extends Pane {
                 
                 if (parent instanceof WasteView) { // coming from the waste
                     game.move(SolitaireDeck.Pile.WASTE,SolitaireDeck.Pile.COLUMN, toWhich);
-                    waste.remove_top_card();
+                    waste.remove_top_card(game.nextWasteCard());
                 } else if (parent instanceof FoundationPileView) {
                     var pfpv = ((FoundationPileView) parent);
                     game.move(SolitaireDeck.Pile.FOUNDATION, SolitaireDeck.Pile.COLUMN, pfpv.getSuit().ordinal(), toWhich);
@@ -211,38 +209,16 @@ public class SolitairePane extends Pane {
         var parent = ((Node) source).getParent();
         
         boolean successfulmove = false;
+        double originX = cvg.getXInPane();
+        double originY = cvg.getYInPane();
         
-        // check player columns
-        for (CardViewGroup group : playerColumns) {
-            int toWhich = getColumnIndex(group);
-            if (group != cvg.getTopGroup() && game.canAddColumnCard(toWhich, toTest)) {
-                
-                if (parent instanceof WasteView) { // coming from the waste
-                    game.move(SolitaireDeck.Pile.WASTE,SolitaireDeck.Pile.COLUMN, toWhich);
-                    waste.remove_top_card();
-                } else if (parent instanceof FoundationPileView) {
-                    var pfpv = ((FoundationPileView) parent);
-                    game.move(SolitaireDeck.Pile.FOUNDATION, SolitaireDeck.Pile.COLUMN, pfpv.getSuit().ordinal(), toWhich);
-                    pfpv.remove_top_card(null);
-                } else if (parent instanceof CardViewGroup) {
-                    var pcvg = ((CardViewGroup) parent);
-                    pcvg.removeLowerGroup();
-                    int fromWhich = getColumnIndex(pcvg);
-                    game.move(SolitaireDeck.Pile.COLUMN, SolitaireDeck.Pile.COLUMN, fromWhich, toWhich, cvg.getSize());
-                }
-                group.getBottomGroup().appendCardViewGroup(cvg);
-                successfulmove = true;
-                break;
-            }
-        }
-        
-        if (cvg.is_leaf() && !successfulmove) {
+        if (cvg.is_leaf()) {
             // check if within bounds of foundation piles
             for (FoundationPileView foundation : foundations) {
                 int toWhich = foundation.getSuit().ordinal();
                 if (foundation != parent && game.canAddFoundationCard(toWhich,toTest)){
                     if (parent instanceof WasteView) { // coming from the waste
-                        waste.remove_top_card();
+                        waste.remove_top_card(game.nextWasteCard());
                         game.move(SolitaireDeck.Pile.WASTE,SolitaireDeck.Pile.FOUNDATION, toWhich);
                     } else if (parent instanceof FoundationPileView) {
                         ((FoundationPileView) parent).remove_top_card(null);
@@ -253,13 +229,45 @@ public class SolitairePane extends Pane {
                         pcvg.removeLowerGroup();
                         game.move(SolitaireDeck.Pile.COLUMN, SolitaireDeck.Pile.FOUNDATION, fromWhich, toWhich);
                     }
-                    foundation.put_card_on_top(toTest);
+                    CardViewGroup newCVG = foundation.put_card_on_top(toTest);
+                    foundation.toFront();
+                    newCVG.moveFrom(foundation.getXInPane() - originX, foundation.getYInPane() - originY,
+                           CardViewGroup.FAST_ANIM_DUR);
                     successfulmove = true;
                     break;
                 }
             }
         }
         
+        // check player columns
+        if (!successfulmove) {
+            for (CardViewGroup group : playerColumns) {
+                int toWhich = getColumnIndex(group);
+                if (group != cvg.getTopGroup() && game.canAddColumnCard(toWhich, toTest)) {
+
+                    if (parent instanceof WasteView) { // coming from the waste
+                        game.move(SolitaireDeck.Pile.WASTE,SolitaireDeck.Pile.COLUMN, toWhich);
+                        waste.remove_top_card(game.nextWasteCard());
+                    } else if (parent instanceof FoundationPileView) {
+                        var pfpv = ((FoundationPileView) parent);
+                        game.move(SolitaireDeck.Pile.FOUNDATION, SolitaireDeck.Pile.COLUMN, pfpv.getSuit().ordinal(), toWhich);
+                        pfpv.remove_top_card(null);
+                    } else if (parent instanceof CardViewGroup) {
+                        var pcvg = ((CardViewGroup) parent);
+                        pcvg.removeLowerGroup();
+                        int fromWhich = getColumnIndex(pcvg);
+                        game.move(SolitaireDeck.Pile.COLUMN, SolitaireDeck.Pile.COLUMN, fromWhich, toWhich, cvg.getSize());
+                    }
+                    group.getBottomGroup().appendCardViewGroup(cvg);
+                    group.toFront();
+                    cvg.moveFrom(cvg.getXInPane() - originX, cvg.getYInPane() - originY,
+                           CardViewGroup.FAST_ANIM_DUR);
+                    successfulmove = true;
+                    break;
+                }
+            }
+        }
+
         // check for card reveal
         if ((parent instanceof CardViewGroup) && (((CardViewGroup)parent).getTopGroup().is_leaf())) {
             // get index of playerColumn
