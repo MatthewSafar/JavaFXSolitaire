@@ -191,6 +191,18 @@ public class SolitaireDeck {
         return (waste.size() == 0);
     }
     
+    public Card getNextFoundationCard( DeckInfo.Suits suit) {
+        var foundation = foundations.get(suit.ordinal());
+        if (foundation.size() >= 2) {
+            Card temp = foundation.removeLast();
+            Card nextCard = foundation.getLast();
+            foundation.addLast(temp);
+            return nextCard;
+        } else {
+            return null;
+        }
+    }
+    
     // move waste back to deck
     public void resetDeck() {
         deck.addAll(waste);

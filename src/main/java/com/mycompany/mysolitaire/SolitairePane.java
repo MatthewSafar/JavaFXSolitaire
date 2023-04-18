@@ -143,13 +143,12 @@ public class SolitairePane extends Pane {
             // check if within bounds of foundation piles
             for (FoundationPileView foundation : foundations) {
                 int toWhich = foundation.getSuit().ordinal();
-                if (game.canAddFoundationCard(toWhich,toTest) && foundation.getBoundsInParent().contains(x,y)){
+                if (game.canAddFoundationCard(toWhich,toTest) && 
+                        foundation.getBoundsInParent().contains(x,y) &&
+                        foundation != parent){
                     if (parent instanceof WasteView) { // coming from the waste
                         waste.remove_top_card(game.nextWasteCard());
                         game.move(SolitaireDeck.Pile.WASTE,SolitaireDeck.Pile.FOUNDATION, toWhich);
-                    } else if (parent instanceof FoundationPileView) {
-                        ((FoundationPileView) parent).remove_top_card(null);
-                        // this doesn't affect the game
                     } else if (parent instanceof CardViewGroup) {
                         var pcvg = ((CardViewGroup) parent);
                         int fromWhich = getColumnIndex(pcvg);
@@ -164,7 +163,9 @@ public class SolitairePane extends Pane {
         // check player columns
         for (CardViewGroup group : playerColumns) {
             int toWhich = getColumnIndex(group);
-            if (game.canAddColumnCard(toWhich, toTest) && group.bottomBoundsContains(x,y)) {
+            if (game.canAddColumnCard(toWhich, toTest) && 
+                    group.bottomBoundsContains(x,y) &&
+                    group != cvg.getTopGroup()) {
                 
                 if (parent instanceof WasteView) { // coming from the waste
                     game.move(SolitaireDeck.Pile.WASTE,SolitaireDeck.Pile.COLUMN, toWhich);
@@ -172,7 +173,7 @@ public class SolitairePane extends Pane {
                 } else if (parent instanceof FoundationPileView) {
                     var pfpv = ((FoundationPileView) parent);
                     game.move(SolitaireDeck.Pile.FOUNDATION, SolitaireDeck.Pile.COLUMN, pfpv.getSuit().ordinal(), toWhich);
-                    pfpv.remove_top_card(null);
+                    pfpv.remove_top_card(game.getNextFoundationCard(pfpv.getSuit()));
                 } else if (parent instanceof CardViewGroup) {
                     var pcvg = ((CardViewGroup) parent);
                     pcvg.removeLowerGroup();
@@ -220,9 +221,6 @@ public class SolitairePane extends Pane {
                     if (parent instanceof WasteView) { // coming from the waste
                         waste.remove_top_card(game.nextWasteCard());
                         game.move(SolitaireDeck.Pile.WASTE,SolitaireDeck.Pile.FOUNDATION, toWhich);
-                    } else if (parent instanceof FoundationPileView) {
-                        ((FoundationPileView) parent).remove_top_card(null);
-                        // this doesn't affect the game
                     } else if (parent instanceof CardViewGroup) {
                         var pcvg = ((CardViewGroup) parent);
                         int fromWhich = getColumnIndex(pcvg);
@@ -251,7 +249,7 @@ public class SolitairePane extends Pane {
                     } else if (parent instanceof FoundationPileView) {
                         var pfpv = ((FoundationPileView) parent);
                         game.move(SolitaireDeck.Pile.FOUNDATION, SolitaireDeck.Pile.COLUMN, pfpv.getSuit().ordinal(), toWhich);
-                        pfpv.remove_top_card(null);
+                        pfpv.remove_top_card(game.getNextFoundationCard(pfpv.getSuit()) );
                     } else if (parent instanceof CardViewGroup) {
                         var pcvg = ((CardViewGroup) parent);
                         pcvg.removeLowerGroup();
