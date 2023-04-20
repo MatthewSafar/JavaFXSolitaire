@@ -119,7 +119,7 @@ public class SolitairePane extends Pane {
         
         
         
-        setStyle("-fx-background-color: darkgreen; -fx-text-fill: white;");
+        setStyle("-fx-background-color: rgb(9, 70, 9); -fx-text-fill: white;");
     }
     
     public final void setOnDropEvent(EventHandler<? super DropEvent> value) {

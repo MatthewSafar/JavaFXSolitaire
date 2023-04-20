@@ -14,7 +14,7 @@ class SettingsObj {
     private static final double DEFAULT_WIDTH = 1024;
     private static final double DEFAULT_HEIGHT = 640;
     
-    private static final String RESOURCE_PATH = "./src/resources/";
+    private static final String RESOURCE_PATH = "./resources/";
     
     private static final String DEFAULT_BACK_IMAGE_PATH = "file:" + RESOURCE_PATH + "back.png";
     private static final String DEFAULT_EMPTY_IMAGE_PATH = "file:" + RESOURCE_PATH + "empty.png";
@@ -27,6 +27,8 @@ class SettingsObj {
     
     private static final boolean DEFAULT_HARDMODE = false;
     
+    private static final boolean DEFAULT_ISMUTE = false;
+    
     // possible settings
     private double windowWidth;
     private double windowHeight;
@@ -34,6 +36,8 @@ class SettingsObj {
     public DeckInfo deckInfo;
     
     private boolean hardmode;
+    
+    private boolean isMute;
     
     public SettingsObj() {
         windowWidth = DEFAULT_WIDTH;
@@ -51,6 +55,8 @@ class SettingsObj {
             );
         
         hardmode = DEFAULT_HARDMODE;
+        
+        isMute = DEFAULT_ISMUTE;
     }
     
     public double getWidth() {
@@ -63,6 +69,14 @@ class SettingsObj {
     
     public boolean isHardmode() {
         return hardmode;
+    }
+    
+    public boolean isMute() {
+        return isMute;
+    }
+    
+    public void setMute(boolean newMute) {
+        isMute = newMute;
     }
     
     

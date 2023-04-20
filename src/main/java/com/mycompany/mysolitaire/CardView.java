@@ -70,4 +70,8 @@ public class CardView extends ImageView implements MovementPlacement{
         relocate(getLayoutX() + x,getLayoutY() + y);
     }
     
+    public void setScale(double s) {
+        setFitWidth(s * DEF_WIDTH);
+    }
+    
 }
