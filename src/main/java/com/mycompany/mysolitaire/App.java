@@ -1,10 +1,9 @@
 package com.mycompany.mysolitaire;
 
+import java.io.File;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -16,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
@@ -28,10 +28,21 @@ import javafx.util.Duration;
 public class App extends Application {
     public static Scene mainMenu, settingsMenu, cardsScene;
     public static SettingsObj settings;
+    public static MediaPlayer musicPlayer;
 
     @Override
     public void start(Stage primaryStage) {
         settings = new SettingsObj();
+        musicPlayer = settings.getNextMusicTrack();
+        if (musicPlayer != null) {
+            musicPlayer.setMute(settings.isMute());
+            musicPlayer.play();
+            musicPlayer.setOnEndOfMedia(() -> {
+                musicPlayer = settings.getNextMusicTrack();
+                musicPlayer.setMute(settings.isMute());
+                musicPlayer.play();
+            });
+        }
         
         initMainMenu(primaryStage);
         initSettingsMenu(primaryStage);
@@ -97,8 +108,9 @@ public class App extends Application {
             primaryStage.setScene(settingsMenu);
         });
         root.getChildren().add(settingsButton);
+        
         mainMenu = new Scene(root, settings.getWidth(), settings.getHeight());
-        mainMenu.getStylesheets().add("file:./resources/mainMenuStyle.css");
+        mainMenu.getStylesheets().add(getURI(SettingsObj.STATIC_PATH + "mainMenuStyle.css"));
         
         // layout stuff
         sceneTitleGroup.applyCss();
@@ -168,7 +180,7 @@ public class App extends Application {
         root.getChildren().add(leftMenu);
         
         var backButton = new Button();
-        var icon = new ImageView("file:resources/mainMenu-icon.png");
+        var icon = new ImageView(getURI(SettingsObj.STATIC_PATH + "mainMenu-icon.png"));
         icon.setPreserveRatio(true);
         icon.setFitWidth(40);
         backButton.setGraphic(icon);
@@ -179,7 +191,7 @@ public class App extends Application {
         leftMenu.getChildren().add(backButton);
         
         var resetButton = new Button();
-        icon = new ImageView("file:resources/reset-icon.png");
+        icon = new ImageView(getURI(SettingsObj.STATIC_PATH + "reset-icon.png"));
         icon.setPreserveRatio(true);
         icon.setSmooth(true);
         icon.setFitWidth(40);
@@ -195,9 +207,9 @@ public class App extends Application {
         
         var soundButton = new Button();
         if (settings.isMute()) {
-            icon = new ImageView("file:resources/volume-mute-icon.png");
+            icon = new ImageView(getURI(SettingsObj.STATIC_PATH + "volume-mute-icon.png"));
         } else {
-            icon = new ImageView("file:resources/volume-on-icon.png");
+            icon = new ImageView(getURI(SettingsObj.STATIC_PATH + "volume-on-icon.png"));
         }
         icon.setPreserveRatio(true);
         icon.setFitWidth(40);
@@ -205,11 +217,12 @@ public class App extends Application {
         soundButton.setPrefSize(60,60);
         soundButton.setOnAction((ActionEvent e) -> {
             settings.setMute(!settings.isMute());
+            if (musicPlayer !=null) {musicPlayer.setMute(settings.isMute());}
             ImageView newIcon;
             if (settings.isMute()) {
-                newIcon = new ImageView("file:resources/volume-mute-icon.png");
+                newIcon = new ImageView(getURI(SettingsObj.STATIC_PATH + "volume-mute-icon.png"));
             } else {
-                newIcon = new ImageView("file:resources/volume-on-icon.png");
+                newIcon = new ImageView(getURI(SettingsObj.STATIC_PATH + "volume-on-icon.png"));
             }
             newIcon.setPreserveRatio(true);
             newIcon.setFitWidth(40);
@@ -222,7 +235,10 @@ public class App extends Application {
         root.getChildren().add(solitaireGame);
         
         cardsScene = new Scene(root, settings.getWidth(), settings.getHeight());
-        cardsScene.getStylesheets().add("file:./resources/cardSceneStyle.css");
+        cardsScene.getStylesheets().add(getURI(SettingsObj.STATIC_PATH + "cardSceneStyle.css"));
     }
-
+    
+    public static String getURI(String resourcePath) {
+        return new File(resourcePath).toURI().toString();
+    }
 }

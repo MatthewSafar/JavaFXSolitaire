@@ -48,12 +48,12 @@ public class DeckInfo {
         setCardImages(deck_location);
         setBackImage(backImageLocation);
         
-        emptyImage = new Image(emptyImageLocation);
-        heartFoundationImage = new Image(heartFoundationImageLocation);
-        diamondFoundationImage = new Image(diamondFoundationImageLocation);
-        clubFoundationImage = new Image(clubFoundationImageLocation);
-        spadeFoundationImage = new Image(spadeFoundationImageLocation);
-        deckRefreshImage = new Image(deckRefreshImageLocation);
+        emptyImage = new Image(App.getURI(emptyImageLocation));
+        heartFoundationImage = new Image(App.getURI(heartFoundationImageLocation));
+        diamondFoundationImage = new Image(App.getURI(diamondFoundationImageLocation));
+        clubFoundationImage = new Image(App.getURI(clubFoundationImageLocation));
+        spadeFoundationImage = new Image(App.getURI(spadeFoundationImageLocation));
+        deckRefreshImage = new Image(App.getURI(deckRefreshImageLocation));
     }
     
     // returns the color of a suit
@@ -66,7 +66,7 @@ public class DeckInfo {
     }
     
     public void setBackImage(String filePath) {
-        backImage = new Image(filePath);
+        backImage = new Image(App.getURI(filePath));
     }
     
     public Image getBackImage() {
@@ -90,7 +90,7 @@ public class DeckInfo {
     
     public void setCardImages(String folderPath) {
         for (int i = 0; i < DECK_SIZE; i++) {
-            cardImages[i] = new Image("file:" + folderPath + "/" + indexToName(i));
+            cardImages[i] = new Image(App.getURI(folderPath + "/" + indexToName(i)));
         }
     }
     

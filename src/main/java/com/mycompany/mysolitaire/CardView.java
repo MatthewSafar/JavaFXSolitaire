@@ -1,10 +1,7 @@
 package com.mycompany.mysolitaire;
 
-import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import static javafx.scene.transform.Transform.translate;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -29,25 +26,29 @@ public class CardView extends ImageView implements MovementPlacement{
     public CardView() {
         super();
         represented = null;
-        setPreserveRatio(true);
-        setSmooth(true);
         setFitWidth(DEF_WIDTH);
+        setFitHeight(DEF_WIDTH * H_W_RATIO);
+        //setPreserveRatio(true);
+        //setSmooth(true);
+        
     }
     
     public CardView(Image thisImage) {
         super(thisImage);
         represented = null;
-        setPreserveRatio(true);
-        setSmooth(true);
         setFitWidth(DEF_WIDTH);
+        setFitHeight(DEF_WIDTH * H_W_RATIO);
+        //setPreserveRatio(true);
+        //setSmooth(true);
     }
     
     public CardView(Card newCard) {
         super(App.settings.deckInfo.getCardImage(newCard));
         represented = newCard;
-        setPreserveRatio(true);
-        setSmooth(true);
         setFitWidth(DEF_WIDTH);
+        setFitHeight(DEF_WIDTH * H_W_RATIO);
+        //setPreserveRatio(true);
+        //setSmooth(true);
     }
     
     public void setCard(Card newCard) {

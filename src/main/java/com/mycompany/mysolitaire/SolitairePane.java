@@ -29,24 +29,27 @@ public class SolitairePane extends Pane {
         
         game = new SolitaireDeck();
         
+        double leftmargin = 30;
+        double topmargin = 20;
+        
         deck = new CardView(App.settings.deckInfo.getBackImage());
-        deck.moveTo(10,20);
+        deck.moveTo(leftmargin,topmargin);
         
         waste = new WasteView();
-        waste.moveTo(CardView.DEF_WIDTH + 10 + 10,20);
+        waste.moveTo(CardView.DEF_WIDTH + 10 + leftmargin,topmargin);
         waste.setCardSource(-(CardView.DEF_WIDTH + 10), 0);
         
         foundations = new FoundationPileView[DeckInfo.Suits.values().length];
         for (DeckInfo.Suits suit : DeckInfo.Suits.values()) {
             var newfound = new FoundationPileView(suit);
-            newfound.moveTo((CardView.DEF_WIDTH + 10)*(3+suit.ordinal()) + 10,20);
+            newfound.moveTo((CardView.DEF_WIDTH + 10)*(3+suit.ordinal()) + leftmargin,topmargin);
             foundations[suit.ordinal()] = newfound;
         }
         
         columns = new CardColumnView[SolitaireDeck.NUM_COLUMNS];
         for (int iter = 0; iter < SolitaireDeck.NUM_COLUMNS; iter++) {
             var newcol = new CardColumnView(iter);
-            newcol.moveTo((CardView.DEF_WIDTH + 10)*iter + 10, 220);
+            newcol.moveTo((CardView.DEF_WIDTH + 10)*iter + leftmargin, 200 + topmargin);
             columns[iter] = newcol;
         }
         

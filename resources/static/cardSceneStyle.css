@@ -1,0 +1,11 @@
+.button {
+    -fx-background-color: transparent;
+}
+
+.button:hover {
+    -fx-background-color: rgb(255,255,255,0.3);
+}
+
+#leftMenu {
+    -fx-background-color: rgb(6, 44, 6);
+}

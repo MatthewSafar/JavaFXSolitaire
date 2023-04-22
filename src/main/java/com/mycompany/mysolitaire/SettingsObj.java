@@ -4,6 +4,13 @@
  */
 package com.mycompany.mysolitaire;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import org.apache.commons.io.FilenameUtils;
+
 /**
  *
  * @author matth
@@ -14,16 +21,21 @@ class SettingsObj {
     private static final double DEFAULT_WIDTH = 1024;
     private static final double DEFAULT_HEIGHT = 640;
     
-    private static final String RESOURCE_PATH = "./resources/";
+    public static final String RESOURCE_PATH = "resources/";
+    public static final String DEFAULT_MUSIC_PATH = RESOURCE_PATH + "music/";
+    public static final String[] SUPPORTED_AUDIO_TYPES = new String[] {"wav", "mp3"};
     
-    private static final String DEFAULT_BACK_IMAGE_PATH = "file:" + RESOURCE_PATH + "back.png";
-    private static final String DEFAULT_EMPTY_IMAGE_PATH = "file:" + RESOURCE_PATH + "empty.png";
-    private static final String DEFAULT_DECK_PATH = RESOURCE_PATH + "/full_deck/";
-    private static final String DEFAULT_HEART_FOUNDATION_IMAGE_PATH = "file:" + RESOURCE_PATH + "heart_foundation.png";
-    private static final String DEFAULT_DIAMOND_FOUNDATION_IMAGE_PATH = "file:" + RESOURCE_PATH + "diamond_foundation.png";
-    private static final String DEFAULT_CLUB_FOUNDATION_IMAGE_PATH = "file:" + RESOURCE_PATH + "club_foundation.png";
-    private static final String DEFAULT_SPADE_FOUNDATION_IMAGE_PATH = "file:" + RESOURCE_PATH + "spade_foundation.png";
-    private static final String DEFAULT_DECK_REFRESH_IMAGE_PATH = "file:" + RESOURCE_PATH + "deck_refresh.png";
+    public static final String STATIC_PATH = RESOURCE_PATH + "static/";
+    private static final String EMPTY_IMAGE_PATH = STATIC_PATH + "empty.png";
+    private static final String HEART_FOUNDATION_IMAGE_PATH = STATIC_PATH + "heart_foundation.png";
+    private static final String DIAMOND_FOUNDATION_IMAGE_PATH = STATIC_PATH + "diamond_foundation.png";
+    private static final String CLUB_FOUNDATION_IMAGE_PATH = STATIC_PATH + "club_foundation.png";
+    private static final String SPADE_FOUNDATION_IMAGE_PATH = STATIC_PATH + "spade_foundation.png";
+    private static final String DECK_REFRESH_IMAGE_PATH = STATIC_PATH + "deck_refresh.png";
+    
+    public static final String DECKS_PATH = RESOURCE_PATH + "decks/";
+    private static final String DEFAULT_BACK_IMAGE_PATH = DECKS_PATH + "default_blue.png";
+    private static final String DEFAULT_DECK_PATH = DECKS_PATH + "/default/";
     
     private static final boolean DEFAULT_HARDMODE = false;
     
@@ -38,6 +50,10 @@ class SettingsObj {
     private boolean hardmode;
     
     private boolean isMute;
+    private int currentTrackNum = -1;
+    private int maxTrackNum;
+    
+    private ArrayList<MediaPlayer> musicList;
     
     public SettingsObj() {
         windowWidth = DEFAULT_WIDTH;
@@ -46,17 +62,48 @@ class SettingsObj {
         
         deckInfo = new DeckInfo(DEFAULT_DECK_PATH,
                 DEFAULT_BACK_IMAGE_PATH,
-                DEFAULT_EMPTY_IMAGE_PATH,
-                DEFAULT_HEART_FOUNDATION_IMAGE_PATH,
-                DEFAULT_DIAMOND_FOUNDATION_IMAGE_PATH,
-                DEFAULT_CLUB_FOUNDATION_IMAGE_PATH,
-                DEFAULT_SPADE_FOUNDATION_IMAGE_PATH,
-                DEFAULT_DECK_REFRESH_IMAGE_PATH
+                EMPTY_IMAGE_PATH,
+                HEART_FOUNDATION_IMAGE_PATH,
+                DIAMOND_FOUNDATION_IMAGE_PATH,
+                CLUB_FOUNDATION_IMAGE_PATH,
+                SPADE_FOUNDATION_IMAGE_PATH,
+                DECK_REFRESH_IMAGE_PATH
             );
         
         hardmode = DEFAULT_HARDMODE;
         
         isMute = DEFAULT_ISMUTE;
+        
+        musicList = new ArrayList<MediaPlayer>();
+        updateMusicList(DEFAULT_MUSIC_PATH);
+    }
+    
+    public void updateMusicList(String newMusicPath) {
+        File musicFolder = new File(newMusicPath);
+        if (musicFolder.isDirectory()) {
+            File[] fileList = musicFolder.listFiles();
+            for (File file : fileList) {
+                String extension = FilenameUtils.getExtension(file.getAbsolutePath());
+                if (Arrays.asList(SUPPORTED_AUDIO_TYPES).contains(extension)) {
+                    MediaPlayer newMedia = new MediaPlayer(new Media(file.toURI().toString()));
+                    // add general settings here
+                    musicList.add(newMedia);
+                    maxTrackNum += 1;
+                }
+            }
+        }
+    }
+    
+    public MediaPlayer getNextMusicTrack() {
+        if (musicList.size() > 0) {
+            currentTrackNum += 1;
+            if (currentTrackNum >= maxTrackNum) {
+                currentTrackNum = 0;
+            }
+            return musicList.get(currentTrackNum);
+        } else {
+            return null;
+        }
     }
     
     public double getWidth() {
