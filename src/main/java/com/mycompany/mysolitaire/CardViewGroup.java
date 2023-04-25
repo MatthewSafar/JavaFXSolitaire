@@ -5,7 +5,6 @@
 package com.mycompany.mysolitaire;
 
 import javafx.animation.TranslateTransition;
-import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -144,7 +143,7 @@ public class CardViewGroup extends Group implements MovementPlacement {
     public boolean appendCardViewGroup(CardViewGroup cvg) {
         if (lowerGroup == null) {
             lowerGroup = cvg;
-            lowerGroup.relocate(0, 0);
+            lowerGroup.moveTo(0, 0);
             if (!is_base) {
                 lowerGroup.shiftBy(0, cardOffset);
             }

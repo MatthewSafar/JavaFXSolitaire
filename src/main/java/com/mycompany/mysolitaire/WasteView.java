@@ -6,7 +6,6 @@ package com.mycompany.mysolitaire;
 
 import java.util.ArrayDeque;
 import javafx.scene.Group;
-import javafx.scene.Node;
 
 /**
  *
@@ -56,8 +55,7 @@ public class WasteView extends Group implements MovementPlacement{
         CardViewGroup toremove = cardStack.removeLast();
         getChildren().remove(toremove);
         if (cardStack.size() > 0) {
-            var nextTopCard = cardStack.getLast();
-            nextTopCard.setInteraction(CardViewGroup.Interaction.DRAGGABLE);
+            cardStack.getLast().setInteraction(CardViewGroup.Interaction.DRAGGABLE);
         }
         // add a card to the back
         if (newCard != null) {

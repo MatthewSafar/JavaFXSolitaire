@@ -34,14 +34,10 @@ public class App extends Application {
     public void start(Stage primaryStage) {
         settings = new SettingsObj();
         musicPlayer = settings.getNextMusicTrack();
-        if (musicPlayer != null) {
+        if (musicPlayer != null) { // then there are files in the music folder
             musicPlayer.setMute(settings.isMute());
             musicPlayer.play();
-            musicPlayer.setOnEndOfMedia(() -> {
-                musicPlayer = settings.getNextMusicTrack();
-                musicPlayer.setMute(settings.isMute());
-                musicPlayer.play();
-            });
+            musicPlayer.setOnEndOfMedia(this::nextTrack);
         }
         
         initMainMenu(primaryStage);
@@ -240,5 +236,12 @@ public class App extends Application {
     
     public static String getURI(String resourcePath) {
         return new File(resourcePath).toURI().toString();
+    }
+    
+    private void nextTrack() {
+        musicPlayer = settings.getNextMusicTrack();
+        musicPlayer.setMute(settings.isMute());
+        musicPlayer.play();
+        musicPlayer.setOnEndOfMedia(this::nextTrack);
     }
 }

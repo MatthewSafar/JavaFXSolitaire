@@ -1,10 +1,11 @@
 package com.mycompany.mysolitaire;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.AudioClip;
+import javafx.scene.media.Media;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -24,8 +25,15 @@ public class SolitairePane extends Pane {
     public FoundationPileView[] foundations;
     public CardColumnView[] columns;
     public CardViewGroup[] playerColumns;
+    private AudioClip shuffleSound;
+    private AudioClip placeSound;
+    private AudioClip pickupSound;
     
     SolitairePane() {
+        shuffleSound = new AudioClip(App.getURI(SettingsObj.STATIC_PATH + "shuffle.wav"));
+        shuffleSound.play();
+        
+        placeSound = new AudioClip(App.getURI(SettingsObj.STATIC_PATH + "place.wav"));
         
         game = new SolitaireDeck();
         
@@ -84,6 +92,7 @@ public class SolitairePane extends Pane {
                 } else if (deck.getImage() == App.settings.deckInfo.deckRefreshImage) {
                     game.resetDeck();
                     deck.setImage(App.settings.deckInfo.getBackImage());
+                    shuffleSound.play();
                 }
 
 
@@ -102,9 +111,11 @@ public class SolitairePane extends Pane {
                     game.resetDeck();
                     deck.setImage(App.settings.deckInfo.getBackImage());
                     waste.animatedRemoveAll();
+                    shuffleSound.play();
                 }
                 if (nextCard != null) {
                     waste.add_card(nextCard);
+                    placeSound.play();
                 }
             }
         });
@@ -203,6 +214,7 @@ public class SolitairePane extends Pane {
         if (!successfulDrop) {
             cvg.moveBack();
         }
+        placeSound.play();
     }
     
     // look for a pile to put card on. put it there if possible
@@ -279,6 +291,10 @@ public class SolitairePane extends Pane {
                 Card revealedCard = game.revealColumnCard(whichCol);
                 playerColumns[whichCol].appendCardViewGroup(new CardViewGroup(revealedCard));
             }
+        }
+        
+        if (successfulmove) {
+            placeSound.play();
         }
     }
     
