@@ -25,15 +25,13 @@ public class SolitairePane extends Pane {
     public FoundationPileView[] foundations;
     public CardColumnView[] columns;
     public CardViewGroup[] playerColumns;
-    private AudioClip shuffleSound;
-    private AudioClip placeSound;
-    private AudioClip pickupSound;
+    
+    
     
     SolitairePane() {
-        shuffleSound = new AudioClip(App.getURI(SettingsObj.STATIC_PATH + "shuffle.wav"));
-        shuffleSound.play();
-        
-        placeSound = new AudioClip(App.getURI(SettingsObj.STATIC_PATH + "place.wav"));
+        if (!App.settings.isMute()) {
+            App.shuffleSound.play();
+        }
         
         game = new SolitaireDeck();
         
@@ -92,7 +90,9 @@ public class SolitairePane extends Pane {
                 } else if (deck.getImage() == App.settings.deckInfo.deckRefreshImage) {
                     game.resetDeck();
                     deck.setImage(App.settings.deckInfo.getBackImage());
-                    shuffleSound.play();
+                    if (!App.settings.isMute()) {
+                        App.shuffleSound.play();
+                    }
                 }
 
 
@@ -111,11 +111,15 @@ public class SolitairePane extends Pane {
                     game.resetDeck();
                     deck.setImage(App.settings.deckInfo.getBackImage());
                     waste.animatedRemoveAll();
-                    shuffleSound.play();
+                    if (!App.settings.isMute()) {
+                        App.shuffleSound.play();
+                    }
                 }
                 if (nextCard != null) {
                     waste.add_card(nextCard);
-                    placeSound.play();
+                    if (!App.settings.isMute()) {
+                        App.placeSound.play();
+                    }
                 }
             }
         });
@@ -214,7 +218,9 @@ public class SolitairePane extends Pane {
         if (!successfulDrop) {
             cvg.moveBack();
         }
-        placeSound.play();
+        if (!App.settings.isMute()) {
+            App.placeSound.play();
+        }
     }
     
     // look for a pile to put card on. put it there if possible
@@ -293,8 +299,8 @@ public class SolitairePane extends Pane {
             }
         }
         
-        if (successfulmove) {
-            placeSound.play();
+        if (successfulmove && !App.settings.isMute()) {
+            App.placeSound.play();
         }
     }
     

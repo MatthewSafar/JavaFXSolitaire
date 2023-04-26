@@ -3,18 +3,25 @@ package com.mycompany.mysolitaire;
 import java.io.File;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
@@ -29,9 +36,13 @@ public class App extends Application {
     public static Scene mainMenu, settingsMenu, cardsScene;
     public static SettingsObj settings;
     public static MediaPlayer musicPlayer;
+    public static AudioClip shuffleSound;
+    public static AudioClip placeSound;
+    public static AudioClip pickupSound;
 
     @Override
     public void start(Stage primaryStage) {
+        // configure sound
         settings = new SettingsObj();
         musicPlayer = settings.getNextMusicTrack();
         if (musicPlayer != null) { // then there are files in the music folder
@@ -39,6 +50,10 @@ public class App extends Application {
             musicPlayer.play();
             musicPlayer.setOnEndOfMedia(this::nextTrack);
         }
+        shuffleSound = new AudioClip(App.getURI(SettingsObj.STATIC_PATH + "shuffle.wav"));
+        // set volume
+        placeSound = new AudioClip(App.getURI(SettingsObj.STATIC_PATH + "place.wav"));
+        // set volume
         
         initMainMenu(primaryStage);
         initSettingsMenu(primaryStage);
@@ -130,7 +145,6 @@ public class App extends Application {
         sceneTitleGroup.relocate(xpos,settings.getHeight() * 0.3);
         playButton.relocate(xpos,settings.getHeight()*0.7);
         settingsButton.applyCss();
-        System.out.println(settingsButton.prefWidth(-1));
         xpos = settings.getWidth() / 2 + widthOffset - settingsButton.prefWidth(-1);
         settingsButton.relocate(xpos,settings.getHeight()*0.7);
     }
@@ -140,24 +154,109 @@ public class App extends Application {
     // TODO: Allow changes to card appearance, music selection, music volume
     // changes to table appearance, type of solitaire, etc.
     public static void initSettingsMenu(Stage primaryStage) {
-        // main menu
-        var root = new GridPane();
-        root.setAlignment(Pos.CENTER);
-        root.setHgap(10);
-        root.setVgap(10);
+        // settings menu
+        var hseparator = new HBox();
+        hseparator.setFillHeight(true);
+        hseparator.setId("root");
         
+        var titlesound = new VBox();
+        titlesound.setFillWidth(true);
+        titlesound.setPadding(new Insets(40, 40, 40, 40));
+        titlesound.setSpacing(10);
+        HBox.setHgrow(titlesound, Priority.ALWAYS);
+        hseparator.getChildren().add(titlesound);
+        
+        var gamevis = new VBox();
+        gamevis.setPadding(new Insets(40, 40, 40, 0));
+        gamevis.setSpacing(10);
+        gamevis.setFillWidth(true);
+        HBox.setHgrow(gamevis,Priority.ALWAYS);
+        hseparator.getChildren().add(gamevis);
+        
+        var titlePane = new GridPane();
+        titlePane.setAlignment(Pos.CENTER);
+        titlePane.setHgap(10);
+        titlePane.setVgap(10);
         var sceneTitle = new Text("Settings");
-        root.add(sceneTitle, 0, 0);
+        titlePane.add(sceneTitle, 0, 0);
         var backButton = new Button("Main Menu");
         backButton.setOnAction((ActionEvent e) -> {
             primaryStage.setScene(mainMenu);
         });
-        root.add(backButton, 0, 1);
+        titlePane.add(backButton, 0, 1);
         var javaVersion = SystemInfo.javaVersion();
         var javafxVersion = SystemInfo.javafxVersion();
         var label = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
-        root.add(label, 0, 2);
-        settingsMenu = new Scene(root, settings.getWidth(), settings.getHeight());
+        titlePane.add(label, 0, 2);
+        VBox.setVgrow(titlePane, Priority.ALWAYS);
+        titlesound.getChildren().add(titlePane);
+        
+        var soundSettingsPane = new GridPane();
+        // style
+        soundSettingsPane.setPadding(new Insets(20));
+        soundSettingsPane.setHgap(10);
+        soundSettingsPane.setVgap(10);
+        soundSettingsPane.getStyleClass().add("settingsPane");
+        var col1 = new ColumnConstraints();
+        var col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        soundSettingsPane.getColumnConstraints().addAll(col1, col2);
+        // components
+        var soundtitle = new Label("Sound");
+        soundtitle.getStyleClass().add("settingsPaneTitle");
+        soundSettingsPane.add(soundtitle, 0, 0,2,1);
+        var mute = new CheckBox("Mute");
+        soundSettingsPane.add(mute,0,1);
+        var masterVol = new Slider(0,1,1);
+        var masterVolLabel = new Label("Master:");
+        soundSettingsPane.add(masterVolLabel, 0,2);
+        soundSettingsPane.add(masterVol,1,2);
+        VBox.setVgrow(soundSettingsPane,Priority.ALWAYS);
+        titlesound.getChildren().add(soundSettingsPane);
+        
+        var gameSettingsPane = new GridPane();
+        // style
+        gameSettingsPane.setPadding(new Insets(20));
+        gameSettingsPane.setHgap(10);
+        gameSettingsPane.setVgap(10);
+        gameSettingsPane.getStyleClass().add("settingsPane");
+        col1 = new ColumnConstraints();
+        col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        gameSettingsPane.getColumnConstraints().addAll(col1, col2);
+        // components
+        var gametitle = new Label("Gameplay");
+        gametitle.getStyleClass().add("settingsPaneTitle");
+        gameSettingsPane.add(gametitle,0,0,2,1);
+        var hardmode = new CheckBox("Hard Mode");
+        gameSettingsPane.add(hardmode,0,1);
+        VBox.setVgrow(gameSettingsPane, Priority.ALWAYS);
+        gamevis.getChildren().add(gameSettingsPane);
+        
+        var visSettingsPane = new GridPane();
+        // style
+        visSettingsPane.setPadding(new Insets(20));
+        visSettingsPane.setHgap(10);
+        visSettingsPane.setVgap(10);
+        visSettingsPane.getStyleClass().add("settingsPane");
+        col1 = new ColumnConstraints();
+        col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        visSettingsPane.getColumnConstraints().addAll(col1, col2);
+        // components
+        var vistitle = new Label("Graphics");
+        vistitle.getStyleClass().add("settingsPaneTitle");
+        visSettingsPane.add(vistitle, 0, 0,2,1);
+        var cardBackLabel = new Label("Card Back:");
+        String test[] = {"blue","red"};
+        var cardBack = new ComboBox(FXCollections.observableArrayList(test));
+        visSettingsPane.add(cardBackLabel, 0, 1);
+        visSettingsPane.add(cardBack, 1,1);
+        VBox.setVgrow(visSettingsPane, Priority.ALWAYS);
+        gamevis.getChildren().add(visSettingsPane);
+        
+        settingsMenu = new Scene(hseparator, settings.getWidth(), settings.getHeight());
+        settingsMenu.getStylesheets().add(getURI(SettingsObj.STATIC_PATH + "settingsStyle.css"));
         
     }
     

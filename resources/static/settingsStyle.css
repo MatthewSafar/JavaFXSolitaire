@@ -1,0 +1,12 @@
+#root {
+    -fx-background-image: url("./bg.jpg");
+}
+
+.settingsPane {
+    -fx-background-color: rgb(255,255,255,0.5);
+    -fx-background-radius: 8px;
+}
+
+.settingsPaneTitle .text{
+    -fx-font-size: 18pt;
+}
